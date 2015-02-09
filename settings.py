@@ -39,7 +39,7 @@ BANDWIDTH_SAVER = False
 DATE_FORMAT = '%Y-%m-%dT%H:%M:%S+0000'
 PAGINATION_LIMIT = 200
 
-APPLICATION_NAME = env('APP_NAME', 'Superdesk')
+APPLICATION_NAME = env('APP_NAME', 'Live Blog')
 server_url = urlparse(env('SUPERDESK_URL', 'http://localhost:5000/api'))
 CLIENT_URL = env('SUPERDESK_CLIENT_URL', 'http://localhost:9000')
 URL_PROTOCOL = server_url.scheme or None
@@ -55,7 +55,7 @@ X_MAX_AGE = 24 * 3600
 X_HEADERS = ['Content-Type', 'Authorization', 'If-Match']
 
 
-MONGO_DBNAME = env('MONGO_DBNAME', 'superdesk')
+MONGO_DBNAME = env('MONGO_DBNAME', 'liveblog')
 if env('MONGOLAB_URI'):
     MONGO_URI = env('MONGOLAB_URI')
 elif env('MONGODB_PORT'):
@@ -69,7 +69,7 @@ elif env('LEGAL_ARCHIVEDB_PORT'):
                                          LEGAL_ARCHIVE_DBNAME)
 
 ELASTICSEARCH_URL = env('ELASTICSEARCH_URL', 'http://localhost:9200')
-ELASTICSEARCH_INDEX = env('ELASTICSEARCH_INDEX', 'superdesk')
+ELASTICSEARCH_INDEX = env('ELASTICSEARCH_INDEX', 'liveblog')
 if env('ELASTIC_PORT'):
     ELASTICSEARCH_URL = env('ELASTIC_PORT').replace('tcp:', 'http:')
 
@@ -84,24 +84,9 @@ CELERY_ACCEPT_CONTENT = ['pickle', 'json']  # it's using pickle when in eager mo
 
 CELERYBEAT_SCHEDULE_FILENAME = env('CELERYBEAT_SCHEDULE_FILENAME', './celerybeatschedule.db')
 CELERYBEAT_SCHEDULE = {
-    'ingest:update': {
-        'task': 'superdesk.io.update_ingest',
-        # there is internal schedule for updates per provider,
-        # so this is mininal interval when an update can occur
-        'schedule': timedelta(seconds=30),
-        'options': {'expires': 59}
-    },
-    'ingest:gc': {
-        'task': 'superdesk.io.gc_ingest',
-        'schedule': crontab(minute=10),
-    },
     'session:gc': {
         'task': 'apps.auth.session_purge',
         'schedule': crontab(minute=20)
-    },
-    'spike:gc': {
-        'task': 'apps.archive.content_purge',
-        'schedule': crontab(minute=30)
     }
 }
 
@@ -117,21 +102,9 @@ INSTALLED_APPS = [
     'superdesk.comments',
     'superdesk.storage.amazon.import_from_amazon',
 
-    'superdesk.io',
-    'superdesk.io.subjectcodes',
-    'superdesk.io.reuters',
-    'superdesk.io.aap',
-    'superdesk.io.afp',
-    'superdesk.io.ftp',
 
     'apps.archive',
-    'apps.stages',
-    'apps.desks',
-    'apps.planning',
-    'apps.coverages',
-    'apps.tasks',
     'apps.preferences',
-    'apps.spikes',
     'apps.groups',
     'apps.prepopulate',
     'apps.vocabularies',
@@ -139,8 +112,11 @@ INSTALLED_APPS = [
     'apps.search',
     'apps.packages',
     'apps.privilege',
-    'apps.rule_sets',
-    'apps.highlights'
+
+
+    'liveblog.blogs',
+    'liveblog.posts',
+    'liveblog.items'
 ]
 
 RESOURCE_METHODS = ['GET', 'POST']
@@ -178,8 +154,8 @@ MAIL_SERVER = env('MAIL_SERVER', 'smtp.googlemail.com')
 MAIL_PORT = int(env('MAIL_PORT', 465))
 MAIL_USE_TLS = json.loads(env('MAIL_USE_TLS', 'False').lower())
 MAIL_USE_SSL = json.loads(env('MAIL_USE_SSL', 'False').lower())
-MAIL_USERNAME = env('MAIL_USERNAME', 'admin@sourcefabric.org')
-MAIL_PASSWORD = env('MAIL_PASSWORD', '')
+MAIL_USERNAME = env('MAIL_USERNAME', 'liveblogsf@gmail.com')
+MAIL_PASSWORD = env('MAIL_PASSWORD', 'fabric2010')
 ADMINS = [MAIL_USERNAME]
 
 # LDAP settings
